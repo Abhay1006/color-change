@@ -1,9 +1,17 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import './App.css';
 
 const App = () => {
   const [clickOrder, setClickOrder] = useState([]);
   const [colors, setColors] = useState(Array(9).fill('bg-white'));
+  const timeoutsRef = useRef([]);
+
+  const clearPendingTimeouts = () => {
+    timeoutsRef.current.forEach(clearTimeout);
+    timeoutsRef.current = [];
+  };
+
+  useEffect(() => clearPendingTimeouts, []);
 
   const handleClick = (index) => {
     if (colors[index] === 'bg-white') {
@@ -20,17 +28,19 @@ const App = () => {
 
   const changeAllToOrange = (order) => {
     order.forEach((i, idx) => {
-      setTimeout(() => {
+      const timeoutId = setTimeout(() => {
         setColors((prevColors) => {
           const newColors = [...prevColors];
           newColors[i] = 'bg-orange-500';
           return newColors;
         });
-      }, idx * 500); 
+      }, idx * 500);
+      timeoutsRef.current.push(timeoutId);
     });
   };
 
   const resetGame = () => {
+    clearPendingTimeouts();
     setClickOrder([]);
     setColors(Array(9).fill('bg-white'));
   };
